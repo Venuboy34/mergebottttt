@@ -49,6 +49,10 @@ from helpers.utils import UserSettings, get_readable_file_size, get_readable_tim
 botStartTime = time.time()
 parent_id = Config.GDRIVE_FOLDER_ID
 
+# Welcome message configuration
+WELCOME_IMAGE = "https://i.ibb.co/DgrswcPP/img-8108646188.jpg"
+UPDATE_CHANNEL = "@zerodev2"  # Update this to your actual channel username
+
 
 class MergeBot(Client):
     def start(self):
@@ -188,9 +192,27 @@ async def start_handler(c: Client, m: Message):
     user.allowed = True
     user.set()
     
-    res = await m.reply_text(
-        text=f"Hi **{m.from_user.first_name}**\n\n ⚡ I am a file/video merger bot\n\n😎 I can merge Telegram files!, And upload it to telegram\n\n**Owner: 🈲 @{Config.OWNER_USERNAME}** ",
+    # Welcome message with image and inline button
+    welcome_text = (
+        f"Hi **{m.from_user.first_name}**\n\n"
+        f"⚡ I am a file/video merger bot\n\n"
+        f"😎 I can merge Telegram files and upload it to telegram\n\n"
+        f"**Owner: 🈲 @{Config.OWNER_USERNAME}**"
+    )
+    
+    # Inline keyboard with update channel button
+    keyboard = InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton("📢 Join Update Channel", url=f"https://t.me/{UPDATE_CHANNEL.lstrip('@')}")]
+        ]
+    )
+    
+    # Send photo with caption and inline button
+    res = await m.reply_photo(
+        photo=WELCOME_IMAGE,
+        caption=welcome_text,
         quote=True,
+        reply_markup=keyboard
     )
     del user
 
