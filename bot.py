@@ -8,6 +8,8 @@ import asyncio
 import os
 import shutil
 import time
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import psutil
 import pyromod
@@ -763,10 +765,32 @@ except KeyError:
     LOGGER.warning("No User Session, Default Bot session will be used")
 
 
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "text/plain")
+        self.end_headers()
+        self.wfile.write(b"OK")
+
+    def log_message(self, format, *args):
+        pass  # Suppress default HTTP server logs
+
+
+def start_health_check_server():
+    server = HTTPServer(("0.0.0.0", 8080), HealthCheckHandler)
+    LOGGER.info("Health check server started on port 8080")
+    server.serve_forever()
+
+
 if __name__ == "__main__":
     # with mergeApp:
     #     bot:User = mergeApp.get_me()
     #     bot_username = bot.username
+
+    # Start health check server on port 8080 for Koyeb
+    health_thread = threading.Thread(target=start_health_check_server, daemon=True)
+    health_thread.start()
+
     try:
         with userBot:
             userBot.send_message(
